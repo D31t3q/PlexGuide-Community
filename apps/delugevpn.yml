@@ -34,11 +34,11 @@
     - name: 'Including plugins'
       include_tasks: '/opt/communityapps/apps/_vpnplugins.yml'
       
-    - name: 'openvpn'
-      template:
-        src:  "deluge/openvpn"
-        dest: "/opt/appdate/{{pgrole}}/openvpn"
-        force:  "yes"
+ #   - name: 'openvpn'
+  #    template:
+   #     src:  "deluge/openvpn"
+    #    dest: "/opt/appdata/{{pgrole}}/openvpn"
+     #   force:  "yes"
 
     - name: 'Checking for existing app data'
       stat:
