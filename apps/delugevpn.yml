@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-# Title:      PGBlitz (Reference Title File)
+# Title:      PlexGuide (Reference Title File)
 # Author(s):  Admin9705
-# URL:        https://pgblitz.com - http://github.pgblitz.com
+# URL:        https://plexguide.com - http://github.plexguide.com
 # GNU:        General Public License v3.0
 ################################################################################
 ---
@@ -13,6 +13,7 @@
     - name: 'Set Known Facts'
       set_fact:
         pgrole: 'deluge'
+        capabilities: 'NET_ADMIN'        
         intport: '8112'
         extport: '8112'
         intport2: '58846'
@@ -27,8 +28,17 @@
     - name: 'Including cron job'
       include_tasks: '/opt/communityapps/apps/_core.yml'
 
-    - name: 'Including folders'
+    - name: 'Including required folders'
       include_tasks: '/opt/communityapps/apps/_downloaders.yml'
+
+    - name: 'Including plugins'
+      include_tasks: '/opt/communityapps/apps/_vpnplugins.yml'
+      
+    - name: 'openvpn'
+      template:
+        src:  "deluge/openvpn"
+        dest: "/opt/appdate/{{pgrole}}/openvpn"
+        force:  "yes"
 
     - name: 'Checking for existing app data'
       stat:
@@ -60,9 +70,15 @@
           VPN_ENABLED: yes
           VPN_USER: vpnuser
           VPN_PASS: vpnpass
-          VPN_PROV: custom
-          ENABLE_PRIVOXY: no
-          STRICT_PORT_FORWARD: no
+          VPN_PROV: pia|air-vpn|custom
+          ENABLE_PRIVOXY: yes
+#          STRICT_PORT_FORWARD: no
+          STRICT_PORT_FORWARD: "true"
+          DELUGE_DAEMON_LOG_LEVEL: 'info'
+          DELUGE_WEB_LOG_LEVEL: info
+#          UMASK: 000
+          DEBUG: false
+#          VPN_DEVICE_TYPE: tun
           LAN_NETWORK: 192.168.1.1/24
 
     # MAIN DEPLOYMENT #############################################################
@@ -76,6 +92,7 @@
           - '{{ports.stdout}}{{extport2}}:{{intport2}}'
           - '{{ports.stdout}}{{extport3}}:{{intport3}}'
           - '{{ports.stdout}}{{extport4}}:{{intport4}}'
+        capabilities: "NET_ADMIN" 
         volumes: '{{pg_volumes}}'
         env: '{{pg_env}}'
         restart_policy: unless-stopped
@@ -101,7 +118,7 @@
         path: '/opt/appdata/{{pgrole}}/core.conf'
         state: present
         delay: 5
-
+        
     - name: Setting plugins directory
       lineinfile:
         path: '/opt/appdata/{{pgrole}}/core.conf'
